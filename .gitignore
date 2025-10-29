@@ -1,2 +1,59 @@
+# ====== PYTHON ======
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+ENV/
+
+# Configs locais ou sensíveis
+*.env
+.env.*
+*.ini
+config.json
+secrets.json
+
+# ====== LOGS E RESULTADOS ======
+*.log
+logs/
+results_*.csv
+*.csv
+*.bak
+*.tmp
+
+# ====== NAVEGADOR / PERFIL SELENIUM ======
+# Pasta de perfil do Chrome (onde fica o login do WhatsApp)
+chrome-profile-whatsapp/
+wa-profile/
+selenium-profile/
+user-data-dir*/
+
+# ====== DRIVERS E DEPENDÊNCIAS ======
+chromedriver.exe
+msedgedriver.exe
+geckodriver.exe
+drivers/
+webdriver_manager/
+
+# ====== SISTEMA / EDITORES ======
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.code-workspace
+
+# ====== BACKUPS E TESTES ======
+tests/
+test_*/
+*.old
+*.bak
+*.orig
+
 /contatos.csv
 /resultados_envio.csv
