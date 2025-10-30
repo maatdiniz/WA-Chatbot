@@ -63,7 +63,9 @@ pyperclip
 webdriver-manager
 ````
 
-##🧾 CSV de contatos
+---
+
+## 🧾 CSV de contatos
 
 O arquivo contatos.csv deve ter o seguinte formato:
 ````csv
@@ -76,7 +78,9 @@ O script automaticamente converte para o formato internacional (55DDD...).
 
 O campo {nome} pode ser usado dentro da mensagem para personalização.
 
-##▶️ Execução
+---
+
+## ▶️ Execução
 
 Comando padrão:
 ````bash
@@ -100,7 +104,9 @@ python broadcast_wa_web.py --csv contatos.csv --message "Oi {nome}!" --min-delay
 python broadcast_wa_web.py --csv contatos.csv --message "Teste {nome}" --log-file "logs\wa.log" --results-csv "logs\resultados.csv"
 ````
 
-##🧠 Parâmetros principais
+---
+
+## 🧠 Parâmetros principais
 | Parâmetro                             | Descrição                                            | Padrão                        |
 | ------------------------------------- | ---------------------------------------------------- | ----------------------------- |
 | `--csv`                               | Caminho do arquivo de contatos (`telefone,nome`)     | —                             |
@@ -112,7 +118,9 @@ python broadcast_wa_web.py --csv contatos.csv --message "Teste {nome}" --log-fil
 | `--log-file`                          | Caminho do log de execução                           | `broadcast_wa_web.log`        |
 | `--results-csv`                       | CSV de resultados (criado se não existir)            | `results_YYYYMMDD_HHMMSS.csv` |
 
-##📊 Logs e Resultados
+---
+
+## 📊 Logs e Resultados
 
 Log: tudo é registrado em tempo real no terminal e no arquivo broadcast_wa_web.log
 
@@ -124,7 +132,9 @@ timestamp,telefone,nome,status,motivo
 2025-10-29 15:30:10,5562888888888,Maria,falha,nao_enviado
 ````
 
-##🧩 Recomendado
+---
+
+## 🧩 Recomendado
 
 Criar uma pasta separada (wa-profile/) para manter a sessão logada do WhatsApp Web.
 
@@ -134,13 +144,17 @@ Respeitar limites naturais de tempo entre envios.
 
 Fazer testes locais com poucos contatos antes de rodar listas grandes.
 
-##⚖️ Aviso Legal
+---
+
+## ⚖️ Aviso Legal
 
 >Este projeto é destinado a fins de estudo e uso pessoal.
 >O uso comercial ou em massa pode violar os Termos de Serviço do WhatsApp / Meta.
 >O autor não se responsabiliza por bloqueios ou sanções aplicadas a contas que usem esta automação de forma indevida.
 
-##📄 Licença
+---
+
+## 📄 Licença
 
 MIT License © 2025
 Desenvolvido por Matheus Diniz Amorim
