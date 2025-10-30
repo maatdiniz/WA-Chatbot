@@ -1,0 +1,3 @@
+selenium
+pyperclip
+webdriver-manager
