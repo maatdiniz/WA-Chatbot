@@ -29,10 +29,11 @@ results_*.csv
 
 # ====== NAVEGADOR / PERFIL SELENIUM ======
 # Pasta de perfil do Chrome (onde fica o login do WhatsApp)
-chrome-profile-whatsapp/
+chrome-profile/
 wa-profile/
 selenium-profile/
 user-data-dir*/
+CEAD/
 
 # ====== DRIVERS E DEPENDÊNCIAS ======
 chromedriver.exe
