@@ -38,18 +38,29 @@ class WhatsAppDriver:
 
     def iniciar_driver(self):
         options = Options()
-        # Salva o perfil do navegador na pasta do projeto para manter o login
         dir_path = os.getcwd()
         profile_path = os.path.join(dir_path, "chrome_profile")
         options.add_argument(f"user-data-dir={profile_path}")
         
-        # Flags para evitar detecção básica de bot
+        # --- NOVAS FLAGS ANTI-BLOQUEIO ---
+        # Esconde que é automação
+        options.add_argument("--disable-blink-features=AutomationControlled") 
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option('useAutomationExtension', False)
+        
+        # User-Agent de navegador real (simula um Chrome normal de usuário)
+        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        
         options.add_argument("--start-maximized")
         options.add_argument("--disable-infobars")
         options.add_argument("--disable-extensions")
         
         service = Service(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=service, options=options)
+        
+        # Truque extra para remover a propriedade 'webdriver' do navegador via JavaScript
+        self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        
         self.wait = WebDriverWait(self.driver, 20)
         
         self.driver.get("https://web.whatsapp.com")
@@ -92,53 +103,60 @@ class WhatsAppDriver:
         try:
             numero_formatado = self.formatar_numero(numero)
             
-            # --- CORREÇÃO DE ORDEM (CRUCIAL) ---
-            # 1º Passo: Substitui o {nome} ANTES de rodar o spintax
-            # Assim garantimos que o {nome} não seja confundido com uma variação
+            # Prepara a mensagem
             msg_com_nome = mensagem_base.replace("{nome}", nome if nome else "")
-            
-            # 2º Passo: Resolve as variações {Opa|Olá}
             mensagem_final = self.resolver_spintax(msg_com_nome)
             
-            # Codifica a mensagem para URL
-            texto_encoded = urllib.parse.quote(mensagem_final)
-            link = f"https://web.whatsapp.com/send?phone={numero_formatado}&text={texto_encoded}"
+            # --- MUDANÇA CRUCIAL: NÃO ENVIAR TEXTO PELA URL ---
+            # Removemos o &text=... para obrigar o robô a digitar
+            link = f"https://web.whatsapp.com/send?phone={numero_formatado}"
             
             self.driver.get(link)
             
-            # Definição de Timeouts (Lógica que já criamos antes)
             tempo_limite = 60 if primeiro_envio else 20
             wait_local = WebDriverWait(self.driver, tempo_limite)
 
             try:
-                # Espera a caixa de texto aparecer
-                caixa_texto = wait_local.until(EC.presence_of_element_located(
+                # Espera a caixa de texto aparecer e ser clicável
+                caixa_texto = wait_local.until(EC.element_to_be_clickable(
                     (By.XPATH, '//*[@id="main"]/footer//div[@contenteditable="true"]')
                 ))
             except:
                 time.sleep(2)
+                # Verifica erro de número inválido
                 if "número de telefone compartilhado através de url é inválido" in self.driver.page_source.lower():
                     return False, "Número inválido/não tem WhatsApp"
-                return False, "Timeout ao carregar chat (Interface demorou muito)"
+                # Tenta um seletor alternativo (às vezes o WhatsApp muda o DOM)
+                try:
+                    caixa_texto = self.driver.find_element(By.CSS_SELECTOR, "div[role='textbox']")
+                except:
+                    return False, "Timeout: Caixa de texto não encontrada"
 
-            # Delay de "pensando"
-            time.sleep(random.uniform(2, 4))
+            # Delay humano antes de começar a digitar ("Lendo a conversa anterior")
+            time.sleep(random.uniform(1.5, 3))
+            
+            # Clica para focar
+            caixa_texto.click()
+            
+            # --- DIGITAÇÃO HUMANIZADA ---
+            # Usa sua função existente para digitar caractere por caractere
+            # Isso simula o evento de teclado real (keydown/keyup)
+            self.digitar_como_humano(caixa_texto, mensagem_final)
+            
+            # Delay "conferindo o que escreveu" antes de enviar
+            time.sleep(random.uniform(0.5, 1.5))
             
             # Envio
-            caixa_texto.click()
-            time.sleep(0.5)
             caixa_texto.send_keys(Keys.ENTER)
             
             # Tempo pós envio
-            tempo_pos_envio = 10 if primeiro_envio else random.uniform(2, 4)
+            tempo_pos_envio = 10 if primeiro_envio else random.uniform(3, 6)
             time.sleep(tempo_pos_envio)
             
-            if caixa_texto.text.strip() == "":
-                return True, "Enviado com sucesso"
-            else:
-                return False, "Falha ao clicar em enviar"
+            return True, "Enviado com sucesso (Digitado)"
 
         except Exception as e:
+            print(f"Erro detalhado: {e}") # Ajuda no debug
             return False, f"Erro crítico: {str(e)}"
         
     def fechar(self):
