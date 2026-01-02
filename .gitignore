@@ -29,6 +29,7 @@ secrets.json
 logs/
 results_*.csv
 *.csv
+!contatos.csv
 *.bak
 *.tmp
 
@@ -61,5 +62,4 @@ test_*/
 *.bak
 *.orig
 
-/contatos.csv
 /resultados_envio.csv
