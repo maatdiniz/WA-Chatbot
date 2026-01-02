@@ -1,7 +1,7 @@
-# 💬 WA Chatbot — Disparo via WhatsApp Web (Automação local com Selenium)
+# 💬 WA Chatbot — Disparo via WhatsApp Web (Automação local com Selenium + Flet)
 
 Automação de envio de mensagens pelo **WhatsApp Web**, feita em **Python + Selenium**,  
-com controle de tempo, logs, CSV de resultados e suporte a perfis persistentes do Chrome.
+com interface gráfica em **Flet**, controle de tempo, logs, CSV de resultados e suporte a perfil persistente do Chrome.
 
 > ⚠️ Este projeto é apenas para fins educacionais e testes locais.  
 > O uso de automação para mensagens comerciais em massa pode violar os **Termos de Serviço do WhatsApp**.
@@ -11,125 +11,117 @@ com controle de tempo, logs, CSV de resultados e suporte a perfis persistentes d
 ## 🚀 Funcionalidades
 
 ✅ Abre o WhatsApp Web **uma única vez** (mantém sessão ativa com perfil salvo)  
-✅ Busca o contato **sem recarregar a página** (via barra de pesquisa interna)  
-✅ Faz fallback automático via link apenas se o número não estiver salvo  
-✅ Cola e envia mensagens (ENTER / botão / Ctrl+Enter)  
+✅ Envia mensagens digitando de forma humanizada (evita bloco por automação)  
 ✅ Gera **log completo** e **CSV de resultados** com status e motivos  
-✅ Suporta placeholders de mensagem (ex.: `{nome}`)  
+✅ Suporta placeholders de mensagem (ex.: `{nome}`) e spintax `{Olá|Oi}`  
 ✅ Controla tempo mínimo e máximo entre envios (para evitar bloqueios)  
+✅ Interface visual para carregar CSV, editar mensagem e acompanhar progresso
 
 ---
 
-## 📂 Estrutura sugerida
+## 📂 Estrutura
 
 
 ````yaml
 WA Chatbot/
 │
-├── broadcast_wa_web.py # Script principal
-├── contatos.csv # Lista de contatos
-├── requirements.txt # (opcional) Dependências
-├── .gitignore
+├── app.py            # Aplicação principal com GUI (Flet)
+├── backend.py        # Lógica de envio (Selenium)
+├── contatos.csv      # Lista de contatos (CSV com ';')
+├── requirements.txt  # Dependências Python
+├── setup.sh          # Setup automático do venv e instalação
 ├── README.md
 │
-├── logs/ # Logs e resultados (gerados automaticamente)
-│ ├── broadcast_wa_web.log
-│ ├── results_20251029_1530.csv
-│
-└── wa-profile/ # (opcional) perfil persistente do Chrome
+└── chrome_profile/   # Perfil persistente do Chrome (criado automaticamente)
 ````
 
 ---
 
 ## ⚙️ Instalação
 
-> Requer **Python 3.10+**
+Pré‑requisitos:
+- **Python 3.9+**
+- **Google Chrome** instalado (ChromeDriver é baixado automaticamente pelo `webdriver-manager`)
 
+Com Homebrew (opcional):
 ```bash
-pip install selenium pyperclip webdriver-manager
+brew install --cask google-chrome
 ```
 
-
-Se quiser automatizar a instalação:
-
+Usando o script de setup:
 ```bash
+cd /Users/mattdiniz/Dev/WA-Chatbot
+bash setup.sh
+source .venv/bin/activate
+```
+
+Instalação manual (sem Homebrew e sem script):
+```bash
+cd /Users/mattdiniz/Dev/WA-Chatbot
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Conteúdo recomendado de requirements.txt:
+`requirements.txt` contém:
 ````nginx
 selenium
 pyperclip
 webdriver-manager
+flet
 ````
 
 ---
 
 ## 🧾 CSV de contatos
 
-O arquivo contatos.csv deve ter o seguinte formato:
+Formato esperado (delimitado por ponto e vírgula `;`):
 ````csv
-telefone,nome
-62999999999,João
-62988888888,Maria
+telefone;nome
+62999999999;João
+62988888888;Maria
 ````
 
-O script automaticamente converte para o formato internacional (55DDD...).
-
-O campo {nome} pode ser usado dentro da mensagem para personalização.
+Os números são convertidos automaticamente para o formato internacional `55 + DDD + número`.
+Você pode usar `{nome}` na mensagem para personalizar.
 
 ---
 
 ## ▶️ Execução
 
-Comando padrão:
+Abrir a interface (GUI) e iniciar os disparos:
 ````bash
-python broadcast_wa_web.py --csv contatos.csv --message "Olá {nome}, tudo bem?"
+cd /Users/mattdiniz/Dev/WA-Chatbot
+source .venv/bin/activate
+python app.py
 ````
 
-Exemplos de uso:
-
-✅ Usar perfil persistente do Chrome (mantém login entre execuções):
+Alternativa (CLI do Flet):
 ````bash
-python broadcast_wa_web.py --csv contatos.csv --message "Oi {nome}!" --profile "C:\Users\SeuUsuario\wa-profile"
+source .venv/bin/activate
+python -m flet run app.py
 ````
 
-✅ Personalizar tempo entre envios:
-````bash
-python broadcast_wa_web.py --csv contatos.csv --message "Oi {nome}!" --min-delay 3 --max-delay 8
-````
-
-✅ Gerar logs e CSVs em pastas específicas:
-````bash
-python broadcast_wa_web.py --csv contatos.csv --message "Teste {nome}" --log-file "logs\wa.log" --results-csv "logs\resultados.csv"
-````
+Na primeira execução, faça login no WhatsApp Web (QR Code). O perfil é salvo em `chrome_profile/`.
 
 ---
 
-## 🧠 Parâmetros principais
-| Parâmetro                             | Descrição                                            | Padrão                        |
-| ------------------------------------- | ---------------------------------------------------- | ----------------------------- |
-| `--csv`                               | Caminho do arquivo de contatos (`telefone,nome`)     | —                             |
-| `--message`                           | Mensagem com placeholders (ex.: `"Olá {nome}"`)      | —                             |
-| `--profile`                           | Caminho da pasta de perfil do Chrome (mantém sessão) | `None`                        |
-| `--min-delay` / `--max-delay`         | Intervalo aleatório entre envios (segundos)          | `2.0 / 6.0`                   |
-| `--min-wait-chat` / `--max-wait-chat` | Espera antes de colar mensagem                       | `1.2 / 3.5`                   |
-| `--retries`                           | Tentativas extras de envio por contato               | `2`                           |
-| `--log-file`                          | Caminho do log de execução                           | `broadcast_wa_web.log`        |
-| `--results-csv`                       | CSV de resultados (criado se não existir)            | `results_YYYYMMDD_HHMMSS.csv` |
+## 🧠 Observações de funcionamento
+- O envio é feito digitando na caixa de texto do WhatsApp Web (simulação humana).
+- O perfil do Chrome é persistido automaticamente em `chrome_profile/`.
+- Pausas aleatórias são aplicadas entre envios e a cada lote para reduzir risco de bloqueio.
 
 ---
 
 ## 📊 Logs e Resultados
 
-Log: tudo é registrado em tempo real no terminal e no arquivo broadcast_wa_web.log
-
-Resultados: o script gera um CSV com colunas:
+Durante a execução, a interface exibe o log. Além disso, é gerado um CSV de relatório, por exemplo `relatorio_envios_YYYYMMDD_HHMMSS.csv`, com as colunas:
 
 ````csv
-timestamp,telefone,nome,status,motivo
-2025-10-29 15:30:02,5562999999999,João,enviado,enter_ok
-2025-10-29 15:30:10,5562888888888,Maria,falha,nao_enviado
+Telefone;Nome;Status;Detalhes;DataHora
+5562999999999;João;SUCESSO;Enviado com sucesso (Digitado);15:30:02
+5562888888888;Maria;FALHA;Número inválido/não tem WhatsApp;15:30:10
 ````
 
 ---
@@ -156,5 +148,5 @@ Fazer testes locais com poucos contatos antes de rodar listas grandes.
 
 ## 📄 Licença
 
-MIT License © 2025
+MIT License © 2026
 Desenvolvido por Matheus Diniz Amorim

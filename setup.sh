@@ -25,5 +25,5 @@ echo "=========================================="
 echo "Ambiente pronto!"
 echo "Para rodar:"
 echo "  source $VENV_DIR/bin/activate"
-echo '  python broadcast_wa_web.py --csv contatos.csv --message "Oi {nome}"'
+echo "  python app.py"
 echo "=========================================="

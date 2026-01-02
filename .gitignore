@@ -5,12 +5,17 @@ __pycache__/
 *.pyd
 *.db
 *.sqlite3
+lib/
+build/
 
 # Ambientes virtuais
 .venv/
 venv/
 env/
 ENV/
+bin/
+include/
+pyvenv.cfg
 
 # Configs locais ou sensíveis
 *.env
